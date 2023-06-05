@@ -23,5 +23,5 @@ public class Collatz {
         }
         System.out.println();
     }
-}
+} //这只是一行注释，啥用都没有
 
