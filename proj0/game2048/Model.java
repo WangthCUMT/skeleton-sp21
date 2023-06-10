@@ -5,7 +5,7 @@ import java.util.Observable;
 
 
 /** The state of a game of 2048.
- *  @author TODO: YOUR NAME HERE
+ *  Wangth TODO: YOUR NAME HERE
  */
 public class Model extends Observable {
     /** Current contents of the board. */
@@ -138,6 +138,15 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        int row = b.size();
+        int col = b.size();
+        for (int i = 0; i < row; i += 1){
+            for (int j = 0; j < col;j += 1){
+                if (b.tile(i,j) == null){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,7 +157,19 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        boolean flag = false;
+        int row = b.size();
+        int col = b.size();
+        for (int i = 0; i < row; i += 1){
+            for (int j = 0; j < col;j += 1){
+                if (b.tile(i,j) != null){
+                   if (b.tile(i,j).value() == MAX_PIECE){
+                       flag = true;
+                   }
+                }
+            }
+        }
+        return flag;
     }
 
     /**
@@ -159,9 +180,39 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        if (emptySpaceExists(b)){
+            return true;
+        }else {
+            return have_adjacent_col(b) || have_adjacent_row(b);
+        }
     }
 
+    public static boolean have_adjacent_col(Board b) {
+        boolean flag = false;
+        int row = b.size();
+        int col = b.size();
+        for (int i = 0; i < row; i += 1){
+            for (int j = 0; j < col-1;j += 1){
+                if (b.tile(i,j).value() == b.tile(i,j+1).value()){
+                    flag = true;
+                }
+            }
+        }
+        return flag;
+    }
+    public static boolean have_adjacent_row(Board b) {
+        boolean flag = false;
+        int row = b.size();
+        int col = b.size();
+        for (int i = 0; i < row - 1; i += 1) {
+            for (int j = 0; j < col; j += 1) {
+                if (b.tile(i, j).value() == b.tile(i+1, j).value()) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
+    }
 
     @Override
      /** Returns the model as a string, used for debugging. */
