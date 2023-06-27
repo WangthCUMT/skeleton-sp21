@@ -36,6 +36,7 @@ public class TestBuggyAList {
               // remove last
               int removedlast = L.removeLast();
               int brokenremovelast = broken.removeLast();
+              assertEquals(removedlast,brokenremovelast);
           }
       }
   }
