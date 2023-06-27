@@ -23,6 +23,33 @@ public class TimeSLList {
 
     public static void timeGetLast() {
         // TODO: YOUR CODE HERE
+        int[] N = new int[]{1000,2000,4000,8000,16000,32000,64000,128000};
+        AList<Integer> Ns = new AList<>();
+        AList<Double> times = new AList<>();
+        AList<Integer> out = new AList<>();
+        AList<Integer> ops = new AList<>();
+        for (int i = 0; i < N.length; i++){
+            SLList<Integer> Si = create(N[i]);
+            out.addLast(Si.size());
+            Stopwatch sw = new Stopwatch();
+            getNtimes(Si,10000);
+            double timeInSeconds = sw.elapsedTime();
+            times.addLast(timeInSeconds);
+            ops.addLast(10000);
+        }
+        printTimingTable(out,times,ops);
     }
-
+    // 创建一个有N大小的SLList
+    private static SLList<Integer> create(int N){
+        SLList<Integer> Si = new SLList<>();
+        for(int i = 0; i < N; i++){
+            Si.addFirst(i);
+        }
+        return Si;
+    }
+    private static void getNtimes(SLList<Integer> Sin,int N){
+        for (int i = 0; i < N; i++){
+            Sin.getLast();
+        }
+    }
 }
