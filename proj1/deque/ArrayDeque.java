@@ -1,6 +1,6 @@
 package deque;
-
-public class ArrayDeque<T> {
+import java.util.Iterator;
+public class ArrayDeque<T> implements Deque<T>, Iterable<T>{
     private T[] items;
     private int arraysize;
     private int size;
@@ -28,23 +28,20 @@ public class ArrayDeque<T> {
     private boolean isfull(){
         return size == arraysize;
     }
-    public boolean isEmpty(){
-        return size == 0;
-    }
-    public void addLast(T i){
+    public void addLast(T item){
         if (isfull()){
             resizeup();
         }
         size += 1;
-        items[nextlast] = i;
+        items[nextlast] = item;
         nextlast = (nextlast + 1) % arraysize;
     }
-    public void addFirst(T i){
+    public void addFirst(T item){
         if (isfull()){
             resizeup();
         }
         size += 1;
-        items[nextfirst] = i;
+        items[nextfirst] = item;
         nextfirst = (nextfirst - 1 + arraysize)% arraysize;
         startindex = (nextfirst + 1) % arraysize;
     }
@@ -117,9 +114,52 @@ public class ArrayDeque<T> {
         }
         System.out.println();
     }
+    // 创建迭代器
+    public Iterator<T> iterator() {
+        return new ARDequeSetIterator();
+    }
+    private class ARDequeSetIterator implements Iterator<T> {
+        private int pos;
+        public ARDequeSetIterator(){
+            pos = 0;
+        }
+        @Override
+        public boolean hasNext(){  //这个位置是否有值？
+            return pos < size();
+        }
+        public T next(){  // 这个位置的值是什么？
+            T returnitem = get(pos);
+            pos += 1;
+            return returnitem;
+        }
+    }
+    @Override
+    public boolean equals(Object o){
+        if (o == null){
+            return false;
+        }
+        if (this == o){
+            return true;
+        }
+        if (!(o instanceof Deque)){
+            return false;
+        }
+        Deque<T> other = (Deque<T>) o;
+        if (this.size() != other.size()){
+            return false;
+        }
+        for (int i = 0; i < size(); i++){
+            if (!(this.get(i).equals(other.get(i)))){
+                return false;
+            }
+        }
+        return true;
+    }
     public static void main(String[] args) {
         ArrayDeque<Integer> a = new ArrayDeque<>(2);
         a.addLast(3);
-        System.out.println(a.get(2));
+        for (int i:a){
+            System.out.println(i);
+        }
     }
 }
