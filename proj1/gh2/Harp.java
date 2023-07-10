@@ -3,7 +3,8 @@ package gh2;
 import deque.Deque;
 import deque.LinkedListDeque;
 
-public class Harp {private static final int SR = 44100;      // Sampling Rate
+public class Harp {
+    private static final int SR = 44100;      // Sampling Rate
     private static final double DECAY = .992; // energy decay factor
 
     /* Buffer for storing sound data. */
@@ -11,8 +12,8 @@ public class Harp {private static final int SR = 44100;      // Sampling Rate
 
     /* Create a guitar string of the given frequency.  */
     public Harp(double frequency) {
-        int capacity = (int) Math.round(SR/frequency) * 2;
-        for (int i = 0; i < capacity;i++){
+        int capacity = (int) Math.round(SR / frequency) * 2;
+        for (int i = 0; i < capacity; i++) {
             buffer.addLast((double) 0);
         }
     }
@@ -25,7 +26,7 @@ public class Harp {private static final int SR = 44100;      // Sampling Rate
         //       are different from each other. It means you should repeatedly call
         //       Math.random() - 0.5 to generate new random numbers for each array index.
         Deque<Double> temp = new LinkedListDeque<>();
-        for (int i = 0; i < buffer.size();i++){
+        for (int i = 0; i < buffer.size(); i++) {
             temp.addLast(Math.random() - 0.5);
         }
         buffer = temp;
@@ -36,7 +37,7 @@ public class Harp {private static final int SR = 44100;      // Sampling Rate
      */
     public void tic() {
         double removed = buffer.removeFirst();
-        double enqueued = -(removed + buffer.get(0))*DECAY*0.5;
+        double enqueued = -(removed + buffer.get(0)) * DECAY * 0.5;
         buffer.addLast(enqueued);
     }
 

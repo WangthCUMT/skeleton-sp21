@@ -12,8 +12,8 @@ public class Drums {
 
     /* Create a guitar string of the given frequency.  */
     public Drums(double frequency) {
-        int capacity = (int) Math.round(SR/frequency);
-        for (int i = 0; i < capacity;i++){
+        int capacity = (int) Math.round(SR / frequency);
+        for (int i = 0; i < capacity; i++) {
             buffer.addLast((double) 0);
         }
     }
@@ -26,7 +26,7 @@ public class Drums {
         //       are different from each other. It means you should repeatedly call
         //       Math.random() - 0.5 to generate new random numbers for each array index.
         Deque<Double> temp = new LinkedListDeque<>();
-        for (int i = 0; i < buffer.size();i++){
+        for (int i = 0; i < buffer.size(); i++) {
             temp.addLast(Math.random() - 0.5);
         }
         buffer = temp;
@@ -37,11 +37,11 @@ public class Drums {
      */
     public void tic() {
         double removed = buffer.removeFirst();
-        if (Math.random() > 0.5){
-            double enqueued = (removed + buffer.get(0))*DECAY*0.5;
+        if (Math.random() > 0.5) {
+            double enqueued = (removed + buffer.get(0)) * DECAY * 0.5;
             buffer.addLast(enqueued);
-        }else {
-            double enqueued = -(removed + buffer.get(0))*DECAY*0.5;
+        } else {
+            double enqueued = -(removed + buffer.get(0)) * DECAY * 0.5;
             buffer.addLast(enqueued);
         }
     }
