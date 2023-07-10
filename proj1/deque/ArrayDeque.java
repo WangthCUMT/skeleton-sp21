@@ -149,7 +149,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private class ARDequeSetIterator implements Iterator<T> {
         private int pos;
 
-        public ARDequeSetIterator() {
+        ARDequeSetIterator() {
             pos = 0;
         }
 
