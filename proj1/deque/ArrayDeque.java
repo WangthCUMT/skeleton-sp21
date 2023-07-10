@@ -51,6 +51,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             a[startindex + i] = items[(startindex + i) % (arraysize / 2)];
         }
         nextlast = startindex + tempsize;
+        nextfirst = (startindex - 1 + arraysize) % arraysize;
         items = a;
     }
 
