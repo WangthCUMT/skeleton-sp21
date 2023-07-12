@@ -22,5 +22,5 @@ public class Collatz {
         }
         System.out.println();
     }
-} //第一个作业顺利完成了！
+} 
 
