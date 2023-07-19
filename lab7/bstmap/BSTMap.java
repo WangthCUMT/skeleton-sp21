@@ -79,10 +79,10 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return p;
     }
 
-    public String printInOrder() {
+    public void printInOrder() {
         StringBuilder result = new StringBuilder();
         printInOrder(root, result);
-        return result.toString();
+        System.out.println(result.toString());
     }
 
     /* 按左子树、节点、右子树的顺序打印值 */
