@@ -1,9 +1,6 @@
 package bstmap;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     private Node root; //创建根节点
@@ -98,7 +95,18 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     /* Returns a Set view of the keys contained in this map. Not required for Lab 7.
      * If you don't implement this, throw an UnsupportedOperationException. */
     public Set<K> keySet() {
-        throw new UnsupportedOperationException();
+        HashSet<K> hash = new HashSet<>();
+        addKey(root,hash);
+        return hash;
+    }
+
+    private void addKey(Node p, Set<K> set){
+        if (p == null){
+            return;
+        }
+        set.add(p.key);
+        addKey(p.left,set);
+        addKey(p.right,set);
     }
 
     /* Removes the mapping for the specified key from this map if present.
@@ -163,5 +171,13 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
             return curr.key;
         }
 
+    }
+
+    public static void main(String[] args) {
+        BSTMap<Integer,Integer> a =  new BSTMap<>();
+        a.put(2,1);
+        a.put(1,1);
+        a.put(3,1);
+        a.printInOrder();
     }
 }
