@@ -28,7 +28,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int leftIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+        return 2 * i;
     }
 
     /**
@@ -36,7 +36,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int rightIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+        return 2 * i + 1;
     }
 
     /**
@@ -44,7 +44,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
      */
     private static int parentIndex(int i) {
         /* TODO: Your code here! */
-        return 0;
+        return i / 2;
     }
 
     /**
@@ -108,7 +108,12 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         validateSinkSwimArg(index);
 
         /** TODO: Your code here. */
-        return;
+        int pIndex = parentIndex(index); // 目前父节点的索引
+        while (inBounds(pIndex) && (getNode(index).myPriority < getNode(pIndex).myPriority) ){ // 如果还能往上面走，并且目前的值小于父节点的值，那么这个节点需要一直向上
+            swap(index,pIndex);
+            index = pIndex;
+            pIndex = parentIndex(index);
+        }
     }
 
     /**
@@ -119,7 +124,12 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         validateSinkSwimArg(index);
 
         /** TODO: Your code here. */
-        return;
+        int minChildIndex = min(leftIndex(index), rightIndex(index));  // 有最小值的子节点
+        while (inBounds(minChildIndex) && getNode(index).myPriority > getNode(minChildIndex).myPriority){ // 如果还能往下面走，并且目前的值大于子节点的值，那么这个节点需要一直向下
+            swap(index,minChildIndex);
+            index = minChildIndex;
+            minChildIndex = min(leftIndex(index), rightIndex(index));
+        }
     }
 
     /**
@@ -134,6 +144,10 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         }
 
         /* TODO: Your code here! */
+        size += 1;
+        Node newnode = new Node(item, priority);
+        contents[size] = newnode; // 把节点放到最后面
+        swim(size);
     }
 
     /**
@@ -143,7 +157,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public T peek() {
         /* TODO: Your code here! */
-        return null;
+        return contents[1].myItem;
     }
 
     /**
@@ -158,7 +172,16 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public T removeMin() {
         /* TODO: Your code here! */
-        return null;
+        if (size() == 0){
+            return null;
+        }else {
+            T returnitem = peek();
+            swap(1, size);
+            contents[size] = null;
+            size -= 1;
+            sink(1);
+            return returnitem;
+        }
     }
 
     /**
@@ -181,7 +204,30 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     @Override
     public void changePriority(T item, double priority) {
         /* TODO: Your code here! */
-        return;
+        int givenindex = findIndex(this, item);
+        contents[givenindex].myPriority = priority;
+        double ppriority = contents[parentIndex(givenindex)].myPriority;
+        int minchildindex = min(leftIndex(givenindex), rightIndex(givenindex));
+        double minchildpriority = contents[minchildindex].myPriority;
+        if (priority < ppriority){
+            swim(givenindex);
+        } else if (priority > minchildpriority) {
+            sink(givenindex);
+        }else {
+            return;
+        }
+    }
+    /**
+     * 帮助方法，返回和给定的item的值所在的索引
+     */
+    private Integer findIndex(ArrayHeap heap, T item) {
+        int returnindex = 0;
+        for (int i = 1; i <= size; i++) {
+            if (heap.contents[i].myItem.equals(item)) {
+                returnindex = i;
+            }
+        }
+        return returnindex;
     }
 
     /**
@@ -230,6 +276,7 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
     }
 
     private class Node {
+        // item代表储存的东西，在比较中没有用，Priority代表数值，用来比较。
         private T myItem;
         private double myPriority;
 
