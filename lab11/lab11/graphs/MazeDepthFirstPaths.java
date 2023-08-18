@@ -25,7 +25,7 @@ public class MazeDepthFirstPaths extends MazeExplorer {
     }
 
     private void dfs(int v) {
-        marked[v] = true;
+        marked[v] = true; // 标记当前节点v
         announce();
 
         if (v == t) {
@@ -37,11 +37,11 @@ public class MazeDepthFirstPaths extends MazeExplorer {
         }
 
         for (int w : maze.adj(v)) {
-            if (!marked[w]) {
-                edgeTo[w] = v;
+            if (!marked[w]) {// 对于每一个未被标记的邻近节点
+                edgeTo[w] = v; // 设置edgeTo[w] = v
                 announce();
-                distTo[w] = distTo[v] + 1;
-                dfs(w);
+                distTo[w] = distTo[v] + 1; // 设置distTo[w] = distTo[v] + 1
+                dfs(w); //迭代
                 if (targetFound) {
                     return;
                 }
