@@ -1,5 +1,6 @@
 package lab11.graphs;
-import edu.princeton.cs.algs4.IndexMinPQ;
+import edu.princeton.cs.algs4.MinPQ;
+import java.util.Comparator;
 /**
  *  @author Josh Hug
  */
@@ -8,7 +9,8 @@ public class MazeAStarPath extends MazeExplorer {
     private int t;
     private boolean targetFound = false;
     private Maze maze;
-    private IndexMinPQ<Integer> pq;
+    private MinPQ<Integer> pq;
+    private Comparator<Integer> cmp;
 
     public MazeAStarPath(Maze m, int sourceX, int sourceY, int targetX, int targetY) {
         super(m);
@@ -17,11 +19,8 @@ public class MazeAStarPath extends MazeExplorer {
         t = maze.xyTo1D(targetX, targetY);
         distTo[s] = 0;
         edgeTo[s] = s;
-        distTo = new int[m.V()];
-        edgeTo = new int[m.V()];
-        for (int v = 0; v < m.V(); v++){
-            distTo[v] = 10000;
-        }
+        cmp = (o1, o2) -> Integer.compare(h(o1) + distTo[o1], h(o2) + distTo[o2]); // 设置比较器以决定在pq中的顺序
+        pq = new MinPQ<>(cmp);
     }
 
     /** Estimate of the distance from v to the target. Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);*/
@@ -35,7 +34,7 @@ public class MazeAStarPath extends MazeExplorer {
 
     /** Finds vertex estimated to be closest to target. */
     private int findMinimumUnmarked() {
-        return -1;
+        return pq.delMin();
         /* You do not have to use this method. */
     }
 
@@ -45,34 +44,25 @@ public class MazeAStarPath extends MazeExplorer {
         // 将初始顶点插入pq并标记
         // 弹出当前队列顶点v，比较所有邻近顶点w，为d(source,v) + h(v,goal)的顺序储存在pq中
         // 重复弹出并标记
-        pq = new IndexMinPQ<>(maze.V());
-        distTo[s] = 0;
-        pq.insert(s,distTo[s]);
+        pq.insert(s);
         marked[s] = true;
         while (!pq.isEmpty()){
-            int v = pq.delMin();
+            int v = findMinimumUnmarked();
             for (int w : maze.adj(v)){
                 if (!marked[w]){
                     marked[w] = true;
-                    relax(w,v);
+                    edgeTo[w] = v;
+                    distTo[w] = distTo[v] + 1; // distTo数组和h数组是分开的，h数组只在比较的时候拿出来用
+                    announce();
                     if (w == t){
                         return;
+                    }else {
+                        pq.insert(w);
                     }
                 }
             }
         }
     }
-
-    private void relax(int w, int v) {
-        if (distTo[w] > (distTo[v] + 1 + h(v))){
-            distTo[w] = distTo[v] + 1 + h(v);
-            edgeTo[w] = v;
-            if (pq.contains(w)) pq.decreaseKey(w,(distTo[w] + h(w)));
-            else pq.insert(w,(distTo[w] + h(w)));
-            announce();
-        }
-    }
-
 
     @Override
     public void solve() {

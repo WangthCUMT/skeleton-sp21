@@ -2,6 +2,7 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
 
 /** Represents a gitlet commit object.
@@ -10,7 +11,7 @@ import java.util.Date; // TODO: You'll likely use this in this class
  *
  *  @author TODO
  */
-public class Commit {
+public class Commit implements Serializable {
     /**
      * TODO: add instance variables here.
      *
@@ -20,7 +21,32 @@ public class Commit {
      */
 
     /** The message of this Commit. */
-    private String message;
+    private String message; // 记录提交中用户输入的信息
 
     /* TODO: fill in the rest of this class. */
+    private Date timestamp; // 记录时间戳
+    private String parent; //每一个Commit都会有一个指针指向其父提交。
+    // 指针指向Commit中文件的内容，即Blob
+
+    public Commit(){
+        this.message = "initial commit";
+        this.timestamp = new Date(0);
+        this.parent = null;
+    }
+    public Commit(String message, String parent){
+        this.message = message;
+        this.parent = parent;
+    }
+
+    public String getParent() {
+        return parent;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
 }

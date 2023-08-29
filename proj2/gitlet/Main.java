@@ -1,7 +1,9 @@
 package gitlet;
 
+import java.io.File;
+
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author Tonghui Wang
  */
 public class Main {
 
@@ -14,6 +16,7 @@ public class Main {
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
+                Repository.init();
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
@@ -21,4 +24,5 @@ public class Main {
             // TODO: FILL THE REST IN
         }
     }
+
 }

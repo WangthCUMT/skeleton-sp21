@@ -1,5 +1,6 @@
 package lab11.graphs;
 import edu.princeton.cs.algs4.IndexMinPQ;
+import java.util.Comparator;
 /**
  *  @author Josh Hug
  */
@@ -41,11 +42,14 @@ public class MazeAStarPath extends MazeExplorer {
 
     /** Performs an A star search from vertex s. */
     private void astar(int s) {
-        // A star算法步骤：
+        // Dijkstra算法步骤：
         // 将初始顶点插入pq并标记
-        // 弹出当前队列顶点v，比较所有邻近顶点w，为d(source,v) + h(v,goal)的顺序储存在pq中
+        // 弹出当前队列顶点v，比较所有邻近顶点w，为d(source,v) + length of edge(1)的顺序储存在pq中
         // 重复弹出并标记
         pq = new IndexMinPQ<>(maze.V());
+        for (int i = 1; i < maze.V(); i++){
+            pq.insert(i,distTo[i]);
+        }
         distTo[s] = 0;
         pq.insert(s,distTo[s]);
         marked[s] = true;
@@ -64,11 +68,11 @@ public class MazeAStarPath extends MazeExplorer {
     }
 
     private void relax(int w, int v) {
-        if (distTo[w] > (distTo[v] + 1 + h(v))){
-            distTo[w] = distTo[v] + 1 + h(v);
+        if (distTo[w] > (distTo[v] + 1)){
+            distTo[w] = distTo[v] + 1;
             edgeTo[w] = v;
-            if (pq.contains(w)) pq.decreaseKey(w,(distTo[w] + h(w)));
-            else pq.insert(w,(distTo[w] + h(w)));
+            if (pq.contains(w)) pq.decreaseKey(w,distTo[w]);
+            else pq.insert(w,distTo[w]);
             announce();
         }
     }
