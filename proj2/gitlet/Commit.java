@@ -12,7 +12,7 @@ import java.util.*;
  *  TODO: It's a good idea to give a description here of what else this Class
  *  does at a high level.
  *
- *  @author TODO
+ *  @author Tonghui Wang
  */
 public class Commit implements Serializable {
     /**
@@ -24,15 +24,15 @@ public class Commit implements Serializable {
      */
 
     /** The message of this Commit. */
-    private String message; // 记录提交中用户输入的信息
+    private String message; // Record the user input message
 
     /* TODO: fill in the rest of this class. */
-    private Date timestamp; // 记录时间戳
-    private LinkedList<String> parent; //父提交，是一个字符串列表，保存其每一个父提交的SHA1值
-    private HashMap<String,String> Blobs; // 用一个TreeMap保存提交中文件名和Blob的对应关系。 文件名->Blob
-    private String id; //保存这个Commit的SHA1值作为文件名和id，具体计算方式是sha1(message, timestamp, parent, blobs)
+    private Date timestamp; // Record timestamp
+    private LinkedList<String> parent; // A LinkedList, store all the parent commit SHA1 value
+    private HashMap<String,String> Blobs; // HashMap Filename->Blob
+    private String id; //save the SHA1 value of the commit as id ，sha1(message, timestamp, parent, blobs)
 
-    /** 初始提交 */
+    /** Initial commit */
     public Commit(){
         this.message = "initial commit";
         this.timestamp = new Date(0);
@@ -42,6 +42,7 @@ public class Commit implements Serializable {
     }
     public Commit(String message, LinkedList<String> parent){
         this.message = message;
+        this.timestamp = new Date();
         this.parent = parent;
     }
 
@@ -64,5 +65,33 @@ public class Commit implements Serializable {
     public HashMap<String, String> getBlobs() {
         return Blobs;
     }
+    /** Save a commit to a file, named by its SHA1 value */
+    public void writeCommitFile(){
+        String filename = getId();
+        File outputCommitFile = join(Repository.Commit_DIR,filename);
+        writeObject(outputCommitFile,this);
+    }
+    /** read a commit from a commit file
+     * @param file_id the SHA1 ID of the file */
+    public static Commit readCommitFile(String file_id){
+        Commit returnCommit;
+        File infile = join(Repository.Commit_DIR,file_id);
+        returnCommit = readObject(infile, Commit.class);
+        return returnCommit;
+    }
+    /** Get the HEAD commit */
+    public static Commit getHEADCommit(){
+        File HEAD = join(Repository.GITLET_DIR,"HEAD");
+        String HEADCommitID = readContentsAsString(HEAD);
+        return readCommitFile(HEADCommitID);
+    }
 
+    /** Get the file's blob's ID
+     *
+     * @param filename File name you want to get
+     * @return Its corresponding blob's id
+     */
+    public String getCorrespondingID(String filename){
+        return Blobs.get(filename);
+    }
 }
