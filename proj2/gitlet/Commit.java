@@ -2,8 +2,11 @@ package gitlet;
 
 // TODO: any imports you need here
 
+import java.io.File;
+import static gitlet.Utils.*;
 import java.io.Serializable;
 import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.*;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -25,20 +28,24 @@ public class Commit implements Serializable {
 
     /* TODO: fill in the rest of this class. */
     private Date timestamp; // 记录时间戳
-    private String parent; //每一个Commit都会有一个指针指向其父提交。
-    // 指针指向Commit中文件的内容，即Blob
+    private LinkedList<String> parent; //父提交，是一个字符串列表，保存其每一个父提交的SHA1值
+    private HashMap<String,String> Blobs; // 用一个TreeMap保存提交中文件名和Blob的对应关系。 文件名->Blob
+    private String id; //保存这个Commit的SHA1值作为文件名和id，具体计算方式是sha1(message, timestamp, parent, blobs)
 
+    /** 初始提交 */
     public Commit(){
         this.message = "initial commit";
         this.timestamp = new Date(0);
-        this.parent = null;
+        this.parent = new LinkedList<>();
+        this.Blobs = new HashMap<>();
+        this.id = sha1(message, timestamp.toString());
     }
-    public Commit(String message, String parent){
+    public Commit(String message, LinkedList<String> parent){
         this.message = message;
         this.parent = parent;
     }
 
-    public String getParent() {
+    public List<String> getParent() {
         return parent;
     }
 
@@ -49,4 +56,13 @@ public class Commit implements Serializable {
     public Date getTimestamp() {
         return timestamp;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public HashMap<String, String> getBlobs() {
+        return Blobs;
+    }
+
 }
