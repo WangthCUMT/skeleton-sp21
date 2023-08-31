@@ -42,16 +42,15 @@ public class Repository {
 
 
 
-    /* TODO: fill in the rest of this class. */
     /** Creates a new Gitlet version-control system in the current directory. This system will automatically start with one commit: a commit that contains no files and has the commit message initial commit (just like that, with no punctuation).
      *  It will have a single branch: master, which initially points to this initial commit, and master will be the current branch.
      * The timestamp for this initial commit will be 00:00:00 UTC, Thursday, 1 January 1970 in whatever format you choose for dates
      * Since the initial commit in all repositories created by Gitlet will have exactly the same content,
      * it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.
-     * TODO:Create .gitlet dir and other sub dirs.
-     * TODO:Create an original commit and save
-     * TODO：Master and HEAD point to the initial commit
-     * TODO：if already has .gitlet, error
+     * Create .gitlet dir and other sub dirs.
+     * Create an original commit and save
+     * Master and HEAD point to the initial commit
+     * if already has .gitlet, error
      */
     public static void init(){
         // if already has .gitlet, error
@@ -85,11 +84,11 @@ public class Repository {
      * The staging area should be somewhere in .gitlet. If the current working version of the file is identical to the version in the current commit,
      * do not stage it to be added, and remove it from the staging area if it is already there (as can happen when a file is changed, added, and then changed back to it’s original version).
      * The file will no longer be staged for removal (see gitlet rm), if it was at the time of the command.
-     * TODO: Find the file and check whether it exists
-     * TODO:If exists, add the file to staging area
-     * TODO: If the file is same as it in the HEAD commit, do not add it
-     * TODO: if the file in the staging area, update it
-     * TODO: At last, save the staging area for later using
+     * Find the file and check whether it exists
+     * If exists, add the file to staging area
+     * If the file is same as it in the HEAD commit, do not add it
+     * if the file in the staging area, update it
+     * At last, save the staging area for later using
      * */
     public static void add(String filename){
         File addfile = join(CWD, filename);
@@ -124,5 +123,44 @@ public class Repository {
         // Save result files
         stage.writeStagingAreaFile();
         addFileblob.writeBlobFileStage();
+    }
+    /** Unstage the file if it is currently staged for addition. If the file is tracked in the current commit,
+     * stage it for removal and remove the file from the working directory if the user has not already done so
+     * (do not remove it unless it is tracked in the current commit).
+     * @param filename the file you want to remove
+     * */
+    public static void rm(String filename){
+        File rmfile = join(CWD,filename);
+        // Get HEAD commit and staging area
+        Commit HEADCommit = Commit.getHEADCommit();
+        StagingArea stage = StagingArea.readStagingAreaFile();
+        // Failure case, the file is neither staged nor tracked by the head commit
+        if (!(HEADCommit.getBlobs().containsKey(filename) || stage.getAddedList().containsKey(filename))){
+            System.out.println("No reason to remove the file");
+            System.exit(0);
+        }
+        // Unstage the file if it is currently staged for addition
+        if (stage.getAddedList().containsKey(filename)){
+            String rmfileid = stage.getCorrespondingID(filename);
+            StagingArea.removeStageFile(rmfileid);
+            stage.getAddedList().remove(filename);
+        }
+        // If the file is tracked in the current commit, stage it for removal and remove the file from the working directory
+        if (HEADCommit.getBlobs().containsKey(filename)){
+            stage.removeFile(filename);
+        }
+        // Save stage file
+        rmfile.delete();
+        stage.writeStagingAreaFile();
+    }
+    /** Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
+     * The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
+     * it will keep versions of files exactly as they are, and not update them.
+     * A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit,
+     * in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
+     * A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent.
+     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command */
+    public static void commit(String message){
+
     }
 }

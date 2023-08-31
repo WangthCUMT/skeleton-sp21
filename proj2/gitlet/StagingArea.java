@@ -54,4 +54,12 @@ public class StagingArea implements Serializable{
             System.out.println(key);
         }
     }
+
+    /** Remove a file from staging area
+     * @param file_id the remove file's ID
+     */
+    public static void removeStageFile(String file_id){
+        File rmfile = join(Repository.StagingArea_DIR,file_id);
+        rmfile.delete();
+    }
 }

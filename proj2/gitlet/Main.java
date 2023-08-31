@@ -12,6 +12,10 @@ public class Main {
      */
     public static void main(String[] args) {
         // TODO: what if args is empty?
+        if (args.length == 0){
+            System.out.println("Must have at least one argument");
+            System.exit(0);
+        }
         String firstArg = args[0];
         switch(firstArg) {
             case "init":
@@ -26,7 +30,13 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-                validateNumArgs("commit",args,3);
+                validateNumArgs("commit",args,2);
+                Repository.commit(args[1]);
+                break;
+            case "rm":
+                validateNumArgs("rm",args,2);
+                Repository.rm(args[1]);
+                break;
         }
     }
     /**
