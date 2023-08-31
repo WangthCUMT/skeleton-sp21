@@ -106,12 +106,23 @@ public class Repository {
         // if the file in this two parts, get its ID to see whether it changed
         String fileinCommitID = HEADCommit.getCorrespondingID(filename);
         String filestageID = stage.getCorrespondingID(filename);
+        stage.getRemovedList().remove(filename);
         if (addFileID.equals(fileinCommitID)){
+            // if file exits in commit, do nothing
+            stage.getAddedList().remove(filename);
+        } else if (addFileID.equals(filestageID)) {
+            // if file exists in staging area, and content is same, do nothing
             return;
-        } else if (!addFileID.equals(fileinCommitID) && addFileID.equals(filestageID)) {
-            return;
-        } else if () {
-            
+        } else if(stage.getAddedList().containsKey(filename)){
+            // if file exists in staging area, but content is different, delete origin file and create new one.
+            File deleteFile = join(StagingArea_DIR,stage.getAddedList().get(filename));
+            deleteFile.delete();
+            stage.addFile(filename,addFileID);
+        } else {
+            stage.addFile(filename,addFileID);
         }
+        // Save result files
+        stage.writeStagingAreaFile();
+        addFileblob.writeBlobFileStage();
     }
 }

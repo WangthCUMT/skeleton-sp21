@@ -40,10 +40,14 @@ public class Commit implements Serializable {
         this.Blobs = new HashMap<>();
         this.id = sha1(message, timestamp.toString());
     }
+    /** make a copy of parent commit */
     public Commit(String message, LinkedList<String> parent){
         this.message = message;
         this.timestamp = new Date();
-        this.parent = parent;
+        this.parent = new LinkedList<>(parent);
+        String newestCommitID = this.parent.getLast(); // Get parents list
+        Commit LastCommit = readCommitFile(newestCommitID);
+        this.Blobs = LastCommit.getBlobs(); // Get parent's blobs
     }
 
     public List<String> getParent() {

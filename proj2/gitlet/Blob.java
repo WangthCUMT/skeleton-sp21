@@ -53,4 +53,15 @@ public class Blob implements Serializable {
         returnBlob = readObject(infile, Blob.class);
         return returnBlob;
     }
+    public void writeBlobFileStage(){
+        String blobName = getId();
+        File outputBlobFile = join(Repository.StagingArea_DIR,blobName);
+        writeObject(outputBlobFile,this);
+    }
+    public static Blob readBlobFileStage(String file_id){
+        Blob returnBlob;
+        File infile = join(Repository.StagingArea_DIR,file_id);
+        returnBlob = readObject(infile, Blob.class);
+        return returnBlob;
+    }
 }

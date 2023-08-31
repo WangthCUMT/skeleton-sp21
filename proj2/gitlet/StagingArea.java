@@ -49,4 +49,9 @@ public class StagingArea implements Serializable{
     public String getCorrespondingID(String filename){
         return AddedList.get(filename);
     }
+    public void printstage(){
+        for(String key : getAddedList().keySet()){
+            System.out.println(key);
+        }
+    }
 }
