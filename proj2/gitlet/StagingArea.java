@@ -38,6 +38,14 @@ public class StagingArea implements Serializable{
     public HashSet<String> getRemovedList() {
         return RemovedList;
     }
+
+    /** Return whether the staging area is empty
+     *
+     * @return true if  staging area is empty
+     */
+    public boolean isEmpty(){
+        return AddedList.isEmpty() && RemovedList.isEmpty();
+    }
     public void writeStagingAreaFile(){
         File stage = join(Repository.GITLET_DIR, "STAGE");
         writeObject(stage,this);
@@ -61,5 +69,16 @@ public class StagingArea implements Serializable{
     public static void removeStageFile(String file_id){
         File rmfile = join(Repository.StagingArea_DIR,file_id);
         rmfile.delete();
+    }
+    /** Clear the satge file */
+    public void clearStage(){
+        AddedList.clear();
+        RemovedList.clear();
+    }
+    public void moveStagefileToBlob(String file_id){
+        File movefile = join(Repository.StagingArea_DIR,file_id);
+        File newlocation = join(Repository.Blob_DIR,movefile.getName());
+        movefile.renameTo(newlocation);
+        movefile.delete();
     }
 }

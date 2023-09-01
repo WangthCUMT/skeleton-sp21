@@ -2,6 +2,8 @@ package gitlet;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static gitlet.Utils.*;
 
@@ -73,8 +75,8 @@ public class Repository {
         File master = join(heads_DIR,branchName);
         writeContents(master, initialCommit.getId());
         // Create HEAD pointer, whose content is the HEAD file's ID
-        File HEAD = join(GITLET_DIR,"HEAD");
-        writeContents(HEAD, initialCommit.getId());
+        HEAD HEADponiter = new HEAD(initialCommit.getId(),branchName);
+        HEADponiter.writeHEADfile();
         // Create Staging area for later using
         StagingArea stage = new StagingArea();
         stage.writeStagingAreaFile();
@@ -97,7 +99,7 @@ public class Repository {
             System.out.println("File does not exist.");
             System.exit(0);
         }
-        Commit HEADCommit = Commit.getHEADCommit();  // Get the HEAD commit
+        Commit HEADCommit = HEAD.getHEADCommit();  // Get the HEAD commit
         StagingArea stage = StagingArea.readStagingAreaFile(); // Get the current state of staging area
         // Get the added file's ID to check whether it already exist in HEAD commit or Staging area
         Blob addFileblob = new Blob(filename,CWD);
@@ -132,25 +134,24 @@ public class Repository {
     public static void rm(String filename){
         File rmfile = join(CWD,filename);
         // Get HEAD commit and staging area
-        Commit HEADCommit = Commit.getHEADCommit();
+        Commit HEADCommit = HEAD.getHEADCommit();
         StagingArea stage = StagingArea.readStagingAreaFile();
         // Failure case, the file is neither staged nor tracked by the head commit
         if (!(HEADCommit.getBlobs().containsKey(filename) || stage.getAddedList().containsKey(filename))){
             System.out.println("No reason to remove the file");
             System.exit(0);
-        }
-        // Unstage the file if it is currently staged for addition
-        if (stage.getAddedList().containsKey(filename)){
+        }else if (stage.getAddedList().containsKey(filename)){
+            // Unstage the file if it is currently staged for addition
             String rmfileid = stage.getCorrespondingID(filename);
             StagingArea.removeStageFile(rmfileid);
             stage.getAddedList().remove(filename);
-        }
-        // If the file is tracked in the current commit, stage it for removal and remove the file from the working directory
-        if (HEADCommit.getBlobs().containsKey(filename)){
-            stage.removeFile(filename);
+            rmfile.delete();
+        }else if (HEADCommit.getBlobs().containsKey(filename)){
+            // If the file is tracked in the current commit, stage it for removal and remove the file from the working directory
+            stage.getRemovedList().add(filename);
+            rmfile.delete();
         }
         // Save stage file
-        rmfile.delete();
         stage.writeStagingAreaFile();
     }
     /** Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
@@ -159,8 +160,44 @@ public class Repository {
      * A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit,
      * in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
      * A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent.
-     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command */
+     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command
+     * Copy the parent commit
+     * */
     public static void commit(String message){
-
+        //Failure case
+        if (Objects.equals(message, "")){
+            System.out.println("Please enter a commit message.");
+            System.exit(0);
+        }
+        StagingArea stage = StagingArea.readStagingAreaFile();
+        if (stage.isEmpty()){
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+        // Copy the HEAD commit and add HEADcommit's id in newCommit's parent list
+        Commit newCommit = new Commit(message);
+        // Add all the files in staging area to commit's blobs
+        for (Map.Entry<String,String> item : stage.getAddedList().entrySet()){
+            String filename = item.getKey();
+            String fileID = item.getValue();
+            newCommit.getBlobs().put(filename,fileID);
+            stage.moveStagefileToBlob(fileID);
+        }
+        // Remove all the file in staging area remove
+        for (String filename : stage.getRemovedList()){
+            newCommit.getBlobs().remove(filename);
+        }
+        // Change newcommit's id
+        newCommit.setId(sha1(message, newCommit.getTimestamp().toString(), newCommit.getParent().toString(), newCommit.getBlobs().toString()));
+        stage.clearStage();
+        // Save new commit
+        newCommit.writeCommitFile();
+        // Set HEAD to this commit and the branch
+        HEAD currentHEAD = HEAD.readHEADfile();
+        currentHEAD.setHEADCommit(newCommit.getId());
+        // Set branch file
+        String branchName = currentHEAD.getCurrentBranch();
+        File branchfile = join(Repository.heads_DIR,branchName);
+        writeContents(branchfile,currentHEAD.getHEADfileID());
     }
 }

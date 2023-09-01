@@ -40,14 +40,15 @@ public class Commit implements Serializable {
         this.Blobs = new HashMap<>();
         this.id = sha1(message, timestamp.toString());
     }
-    /** make a copy of parent commit */
-    public Commit(String message, LinkedList<String> parent){
+    /** make a copy of HEAD commit */
+    public Commit(String message){
         this.message = message;
         this.timestamp = new Date();
-        this.parent = new LinkedList<>(parent);
-        String newestCommitID = this.parent.getLast(); // Get parents list
-        Commit LastCommit = readCommitFile(newestCommitID);
-        this.Blobs = LastCommit.getBlobs(); // Get parent's blobs
+        Commit HEADCommit = HEAD.getHEADCommit();
+        this.parent = new LinkedList<>(HEADCommit.getParent());
+        this.parent.add(HEADCommit.id);
+        this.Blobs = HEADCommit.getBlobs(); // Get parent's blobs
+        this.id = HEADCommit.getId();
     }
 
     public List<String> getParent() {
@@ -83,12 +84,6 @@ public class Commit implements Serializable {
         returnCommit = readObject(infile, Commit.class);
         return returnCommit;
     }
-    /** Get the HEAD commit */
-    public static Commit getHEADCommit(){
-        File HEAD = join(Repository.GITLET_DIR,"HEAD");
-        String HEADCommitID = readContentsAsString(HEAD);
-        return readCommitFile(HEADCommitID);
-    }
 
     /** Get the file's blob's ID
      *
@@ -97,5 +92,9 @@ public class Commit implements Serializable {
      */
     public String getCorrespondingID(String filename){
         return Blobs.get(filename);
+    }
+    /** Change the id of a commit */
+    public void setId(String id) {
+        this.id = id;
     }
 }

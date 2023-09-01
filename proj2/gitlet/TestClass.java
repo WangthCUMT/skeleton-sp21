@@ -8,15 +8,7 @@ public class TestClass {
         System.out.println(initialCommit.getTimestamp());
         StagingArea stage = StagingArea.readStagingAreaFile();
         stage.printstage(); */
-        LinkedList<String> test = new LinkedList<>();
-        test.add("1");
-        test.add("2");
-        for (String i : test){
-            System.out.println(i);
-        }
-        LinkedList<String> test1 = new LinkedList<>(test);
-        for (String i : test1){
-            System.out.println(i);
-        }
+        StagingArea stage = StagingArea.readStagingAreaFile();
+        System.out.println(stage.isEmpty());
     }
 }
