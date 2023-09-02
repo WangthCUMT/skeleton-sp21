@@ -52,13 +52,33 @@ public class Main {
                     System.out.println("Invalid number of arguments for:checkout");
                     System.exit(0);
                 }
+                if (len == 2) {
+                    // java gitlet.Main checkout [branch name]
+                    Repository.checkoutBranch(args[1]);
+                }
                 // java gitlet.Main checkout -- [file name]
-                if (len == 3) {
+                else if (len == 3) {
                     Repository.checkoutHEADCommit(args[2]);
-                } else if (len == 4) {
+                } else {
                     // java gitlet.Main checkout [commit id] -- [file name]
                     Repository.checkoutCommit(args[1], args[3]);
                 }
+                break;
+            case "status":
+                validateNumArgs("status", args, 1);
+                Repository.status();
+                break;
+            case "branch":
+                validateNumArgs("branch", args, 2);
+                Repository.branch(args[1]);
+                break;
+            case "rm-branch":
+                validateNumArgs("rm-branch",args,2);
+                Repository.rm_branch(args[1]);
+                break;
+            case "reset":
+                validateNumArgs("reset", args ,2);
+                Repository.reset(args[1]);
                 break;
         }
     }

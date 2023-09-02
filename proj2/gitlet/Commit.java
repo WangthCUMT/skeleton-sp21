@@ -52,7 +52,7 @@ public class Commit implements Serializable {
         this.message = message;
         this.timestamp = new Date();
         Commit HEADCommit = HEAD.getHEADCommit();
-        this.parent = new LinkedList<>(HEADCommit.getParent());
+        this.parent = new LinkedList<>();
         this.parent.addFirst(HEADCommit.id);
         this.Blobs = HEADCommit.getBlobs(); // Get parent's blobs
         this.id = HEADCommit.getId();
@@ -128,5 +128,16 @@ public class Commit implements Serializable {
                 "Date: " + this.getDateString() + "\n" +
                 this.message + "\n\n";
         return sb;
+    }
+
+    /** Give a branch name, return the branch commit
+     *
+     * @param branchName give a branch name
+     * @return the branch head commit
+     */
+    public static Commit getBranchCommit(String branchName){
+        File branchFile = join(Repository.heads_DIR,branchName);
+        String branchID = readContentsAsString(branchFile);
+        return readCommitFile(branchID);
     }
 }

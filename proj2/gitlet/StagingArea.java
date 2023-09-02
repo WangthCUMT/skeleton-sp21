@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 import static gitlet.Utils.*;
 
@@ -95,5 +97,12 @@ public class StagingArea implements Serializable {
         File newlocation = join(Repository.Blob_DIR, movefile.getName());
         movefile.renameTo(newlocation);
         movefile.delete();
+    }
+    public static LinkedList<String> getStagingfiles(){
+        LinkedList<String> stagingfiles = new LinkedList<>();
+        StagingArea stage = readStagingAreaFile();
+        stagingfiles.addAll(stage.getAddedList().keySet());
+        stagingfiles.addAll(stage.getRemovedList());
+        return stagingfiles;
     }
 }

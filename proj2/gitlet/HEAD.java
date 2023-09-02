@@ -2,6 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.LinkedList;
 
 import static gitlet.Utils.readObject;
 
@@ -49,5 +50,11 @@ public class HEAD implements Serializable {
 
     public void setBranch(String branch) {
         this.currentBranch = branch;
+    }
+    public static LinkedList<String> getHEADfiles(){
+        Commit HEADCommit = getHEADCommit();
+        LinkedList<String> HEADfiles = new LinkedList<>();
+        HEADfiles.addAll(HEADCommit.getBlobs().keySet());
+        return HEADfiles;
     }
 }
