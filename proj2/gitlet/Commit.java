@@ -1,6 +1,5 @@
 package gitlet;
 
-// TODO: any imports you need here
 
 import java.io.File;
 import java.io.Serializable;
@@ -12,8 +11,6 @@ import static gitlet.Utils.*;
 
 /**
  * Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
  *
  * @author Tonghui Wang
  */
@@ -130,13 +127,14 @@ public class Commit implements Serializable {
         return sb;
     }
 
-    /** Give a branch name, return the branch commit
+    /**
+     * Give a branch name, return the branch commit
      *
      * @param branchName give a branch name
      * @return the branch head commit
      */
-    public static Commit getBranchCommit(String branchName){
-        File branchFile = join(Repository.heads_DIR,branchName);
+    public static Commit getBranchCommit(String branchName) {
+        File branchFile = join(Repository.heads_DIR, branchName);
         String branchID = readContentsAsString(branchFile);
         return readCommitFile(branchID);
     }

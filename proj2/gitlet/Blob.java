@@ -81,14 +81,16 @@ public class Blob implements Serializable {
         File sourceFile = join(Repository.CWD, this.sourceFileName);
         writeContents(sourceFile, this.content);
     }
-    public static boolean isSameContent(String blobID, String filename){
+
+    public static boolean isSameContent(String blobID, String filename) {
         Blob blob = readBlobFile(blobID);
-        File compare = join(Repository.CWD,filename);
+        File compare = join(Repository.CWD, filename);
         return blob.getContentAsString().equals(readContentsAsString(compare));
     }
-    public static void writeBlobAsFile(String blobID){
+
+    public static void writeBlobAsFile(String blobID) {
         Blob blob = readBlobFile(blobID);
         File blobFile = join(Repository.CWD, blob.getSourceFileName());
-        writeContents(blobFile,blob.getContentAsString());
+        writeContents(blobFile, blob.getContentAsString());
     }
 }

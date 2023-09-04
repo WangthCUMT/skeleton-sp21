@@ -61,7 +61,12 @@ public class Main {
                     Repository.checkoutHEADCommit(args[2]);
                 } else {
                     // java gitlet.Main checkout [commit id] -- [file name]
-                    Repository.checkoutCommit(args[1], args[3]);
+                    if (args[1].length() == 6) {
+                        String commitID = Repository.abbCommit(args[1]);
+                        Repository.checkoutCommit(commitID, args[3]);
+                    } else {
+                        Repository.checkoutCommit(args[1], args[3]);
+                    }
                 }
                 break;
             case "status":
@@ -73,12 +78,18 @@ public class Main {
                 Repository.branch(args[1]);
                 break;
             case "rm-branch":
-                validateNumArgs("rm-branch",args,2);
+                validateNumArgs("rm-branch", args, 2);
                 Repository.rm_branch(args[1]);
                 break;
             case "reset":
-                validateNumArgs("reset", args ,2);
-                Repository.reset(args[1]);
+                //commit ID
+                validateNumArgs("reset", args, 2);
+                if (args[1].length() == 6) {
+                    String commitID = Repository.abbCommit(args[1]);
+                    Repository.reset(commitID);
+                } else {
+                    Repository.reset(args[1]);
+                }
                 break;
         }
     }

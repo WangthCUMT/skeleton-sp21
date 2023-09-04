@@ -51,10 +51,15 @@ public class HEAD implements Serializable {
     public void setBranch(String branch) {
         this.currentBranch = branch;
     }
-    public static LinkedList<String> getHEADfiles(){
+
+    public static LinkedList<String> getHEADfiles() {
         Commit HEADCommit = getHEADCommit();
         LinkedList<String> HEADfiles = new LinkedList<>();
         HEADfiles.addAll(HEADCommit.getBlobs().keySet());
         return HEADfiles;
+    }
+
+    public void setHEADfileID(String HEADfileID) {
+        this.HEADfileID = HEADfileID;
     }
 }
