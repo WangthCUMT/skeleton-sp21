@@ -153,7 +153,6 @@ public class Repository {
             String rmfileid = stage.getCorrespondingID(filename);
             StagingArea.removeStageFile(rmfileid);
             stage.getAddedList().remove(filename);
-            rmfile.delete();
         } else if (HEADCommit.getBlobs().containsKey(filename)) {
             // If the file is tracked in the current commit, stage it for removal and remove the file from the working directory
             stage.getRemovedList().add(filename);
@@ -288,6 +287,11 @@ public class Repository {
      */
     public static void checkoutCommit(String commitID, String filename) {
         Commit commit = Commit.readCommitFile(commitID);
+        List<String> commits = plainFilenamesIn(Commit_DIR);
+        if (!commits.contains(commitID)){
+            System.out.println("No commit with that id exists.");
+            System.exit(0);
+        }
         if (!(commit.getBlobs().containsKey(filename))) {
             System.out.println("File does not exist in that commit.");
             System.exit(0);
@@ -354,6 +358,10 @@ public class Repository {
      * Displays what branches currently exist, and marks the current branch with a *. Also displays what files have been staged for addition or removal.
      */
     public static void status() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
         StringBuilder sb = new StringBuilder();
         // Branches part, first add head branch, then other branches
         sb.append("=== Branches ===\n");
@@ -502,21 +510,16 @@ public class Repository {
     public static String abbCommit(String abbID) {
         String returnstr = "111";
         List<String> commits = plainFilenamesIn(Commit_DIR);
-        if (abbID.length() != 6) {
-            System.out.println("No commit with that id exists.");
-            System.exit(0);
-        } else {
-            for (String commit : commits) {
-                String str = commit.substring(0, 6);
-                if (abbID.equals(str)) {
-                    returnstr = commit;
-                    break;
-                }
+        for (String commit : commits) {
+            String str = commit.substring(0, abbID.length());
+            if (abbID.equals(str)) {
+                returnstr = commit;
+                break;
             }
         }
         return returnstr;
     }
     public static void merge(String branchName){
-        
+
     }
 }

@@ -13,7 +13,7 @@ public class Main {
      */
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("Must have at least one argument");
+            System.out.println("Please enter a command.");
             System.exit(0);
         }
         String firstArg = args[0];
@@ -61,7 +61,7 @@ public class Main {
                     Repository.checkoutHEADCommit(args[2]);
                 } else {
                     // java gitlet.Main checkout [commit id] -- [file name]
-                    if (args[1].length() == 6) {
+                    if (args[1].length() < 40) {
                         String commitID = Repository.abbCommit(args[1]);
                         Repository.checkoutCommit(commitID, args[3]);
                     } else {
@@ -84,7 +84,7 @@ public class Main {
             case "reset":
                 //commit ID
                 validateNumArgs("reset", args, 2);
-                if (args[1].length() == 6) {
+                if (args[1].length() < 40) {
                     String commitID = Repository.abbCommit(args[1]);
                     Repository.reset(commitID);
                 } else {
@@ -95,6 +95,8 @@ public class Main {
                  validateNumArgs("merge",args,2);
                 Repository.merge(args[1]);
                 break;
+            default:
+                System.out.println("No command with that name exists.");
         }
     }
 
