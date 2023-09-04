@@ -91,6 +91,10 @@ public class Main {
                     Repository.reset(args[1]);
                 }
                 break;
+            case "merge":
+                 validateNumArgs("merge",args,2);
+                Repository.merge(args[1]);
+                break;
         }
     }
 
