@@ -516,4 +516,7 @@ public class Repository {
         }
         return returnstr;
     }
+    public static void merge(String branchName){
+        
+    }
 }
