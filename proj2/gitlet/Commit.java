@@ -80,18 +80,18 @@ public class Commit implements Serializable {
      */
     public void writeCommitFile() {
         String filename = getId();
-        File outputCommitFile = join(Repository.Commit_DIR, filename);
+        File outputCommitFile = join(Repository.COMMIT_DIR, filename);
         writeObject(outputCommitFile, this);
     }
 
     /**
      * read a commit from a commit file
      *
-     * @param file_id the SHA1 ID of the file
+     * @param fileId the SHA1 ID of the file
      */
-    public static Commit readCommitFile(String file_id) {
+    public static Commit readCommitFile(String fileId) {
         Commit returnCommit;
-        File infile = join(Repository.Commit_DIR, file_id);
+        File infile = join(Repository.COMMIT_DIR, fileId);
         returnCommit = readObject(infile, Commit.class);
         return returnCommit;
     }
@@ -121,9 +121,15 @@ public class Commit implements Serializable {
 
     public String getCommitasString() {
         String sb = "===\n" +
-                "commit " + this.getId() + "\n" +
-                "Date: " + this.getDateString() + "\n" +
-                this.message + "\n\n";
+                "commit " +
+                this.getId()
+                + "\n"
+                +
+                "Date: "
+                + this.getDateString()
+                + "\n"
+                + this.message
+                + "\n\n";
         return sb;
     }
 
@@ -134,7 +140,7 @@ public class Commit implements Serializable {
      * @return the branch head commit
      */
     public static Commit getBranchCommit(String branchName) {
-        File branchFile = join(Repository.heads_DIR, branchName);
+        File branchFile = join(Repository.HEADS_DIR, branchName);
         String branchID = readContentsAsString(branchFile);
         return readCommitFile(branchID);
     }

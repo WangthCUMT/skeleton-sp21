@@ -76,10 +76,10 @@ public class StagingArea implements Serializable {
     /**
      * Remove a file from staging area
      *
-     * @param file_id the remove file's ID
+     * @param fileId the remove file's ID
      */
-    public static void removeStageFile(String file_id) {
-        File rmfile = join(Repository.StagingArea_DIR, file_id);
+    public static void removeStageFile(String fileId) {
+        File rmfile = join(Repository.STAGINGAREA_DIR, fileId);
         rmfile.delete();
     }
 
@@ -91,9 +91,9 @@ public class StagingArea implements Serializable {
         RemovedList.clear();
     }
 
-    public void moveStagefileToBlob(String file_id) {
-        File movefile = join(Repository.StagingArea_DIR, file_id);
-        File newlocation = join(Repository.Blob_DIR, movefile.getName());
+    public void moveStagefileToBlob(String fileId) {
+        File movefile = join(Repository.STAGINGAREA_DIR, fileId);
+        File newlocation = join(Repository.BLOB_DIR, movefile.getName());
         movefile.renameTo(newlocation);
         movefile.delete();
     }

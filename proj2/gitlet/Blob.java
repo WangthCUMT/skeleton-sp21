@@ -48,31 +48,31 @@ public class Blob implements Serializable {
      */
     public void writeBlobFile() {
         String blobName = getId();
-        File outputBlobFile = join(Repository.Blob_DIR, blobName);
+        File outputBlobFile = join(Repository.BLOB_DIR, blobName);
         writeObject(outputBlobFile, this);
     }
 
     /**
      * read a blob from a blob file
      *
-     * @param file_id the SHA1 ID of the file
+     * @param fileId the SHA1 ID of the file
      */
-    public static Blob readBlobFile(String file_id) {
+    public static Blob readBlobFile(String fileId) {
         Blob returnBlob;
-        File infile = join(Repository.Blob_DIR, file_id);
+        File infile = join(Repository.BLOB_DIR, fileId);
         returnBlob = readObject(infile, Blob.class);
         return returnBlob;
     }
 
     public void writeBlobFileStage() {
         String blobName = getId();
-        File outputBlobFile = join(Repository.StagingArea_DIR, blobName);
+        File outputBlobFile = join(Repository.STAGINGAREA_DIR, blobName);
         writeObject(outputBlobFile, this);
     }
 
-    public static Blob readBlobFileStage(String file_id) {
+    public static Blob readBlobFileStage(String fileId) {
         Blob returnBlob;
-        File infile = join(Repository.StagingArea_DIR, file_id);
+        File infile = join(Repository.STAGINGAREA_DIR, fileId);
         returnBlob = readObject(infile, Blob.class);
         return returnBlob;
     }

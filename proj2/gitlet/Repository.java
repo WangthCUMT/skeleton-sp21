@@ -37,19 +37,27 @@ public class Repository {
      * The .gitlet directory.
      */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    public static final File StagingArea_DIR = join(GITLET_DIR, "StagingArea");
-    public static final File Commit_DIR = join(GITLET_DIR, "Commit");
-    public static final File Blob_DIR = join(GITLET_DIR, "Blob");
-    public static final File ref_DIR = join(GITLET_DIR, "ref");
-    public static final File heads_DIR = join(ref_DIR, "heads");
+    public static final File STAGINGAREA_DIR = join(GITLET_DIR, "StagingArea");
+    public static final File COMMIT_DIR = join(GITLET_DIR, "Commit");
+    public static final File BLOB_DIR = join(GITLET_DIR, "Blob");
+    public static final File REF_DIR = join(GITLET_DIR, "ref");
+    public static final File HEADS_DIR = join(REF_DIR, "heads");
 
 
     /**
-     * Creates a new Gitlet version-control system in the current directory. This system will automatically start with one commit: a commit that contains no files and has the commit message initial commit (just like that, with no punctuation).
-     * It will have a single branch: master, which initially points to this initial commit, and master will be the current branch.
-     * The timestamp for this initial commit will be 00:00:00 UTC, Thursday, 1 January 1970 in whatever format you choose for dates
-     * Since the initial commit in all repositories created by Gitlet will have exactly the same content,
-     * it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.
+     * Creates a new Gitlet version-control system in the current directory.
+     * This system will automatically
+     * start with one commit: a commit that contains no files
+     * and has the commit message initial commit (just like that, with no punctuation).
+     * It will have a single branch: master, which initially points to this initial commit,
+     * and master will be the current branch.
+     * The timestamp for this initial commit will be 00:00:00 UTC,
+     * Thursday, 1 January 1970 in whatever format you choose for dates
+     * Since the initial commit in all repositories created by Gitlet will
+     * have exactly the same content,
+     * it follows that all repositories will
+     * automatically share this commit (they will all have the same UID)
+     * and all commits in all repositories will trace back to it.
      * Create .gitlet dir and other sub dirs.
      * Create an original commit and save
      * Master and HEAD point to the initial commit
@@ -63,11 +71,11 @@ public class Repository {
         }
         //Create .gitlet dir and other sub dirs.
         GITLET_DIR.mkdir();
-        StagingArea_DIR.mkdir();
-        Commit_DIR.mkdir();
-        Blob_DIR.mkdir();
-        ref_DIR.mkdir();
-        heads_DIR.mkdir();
+        STAGINGAREA_DIR.mkdir();
+        COMMIT_DIR.mkdir();
+        BLOB_DIR.mkdir();
+        REF_DIR.mkdir();
+        HEADS_DIR.mkdir();
         //Create an original commit and save to Commit
         Commit initialCommit = new Commit();
         initialCommit.writeCommitFile();
@@ -75,7 +83,7 @@ public class Repository {
         writeObject(save, initialCommit);
         // Create master pointer, whose content is the last file's id in master branch
         String branchName = "master";
-        File master = join(heads_DIR, branchName);
+        File master = join(HEADS_DIR, branchName);
         writeContents(master, initialCommit.getId());
         // Create HEAD pointer, whose content is the HEAD file's ID
         HEAD HEADponiter = new HEAD(initialCommit.getId(), branchName);
@@ -86,11 +94,19 @@ public class Repository {
     }
 
     /**
-     * Adds a copy of the file as it currently exists to the staging area (see the description of the commit command). For this reason, adding a file is also called staging the file for addition.
-     * Staging an already-staged file overwrites the previous entry in the staging area with the new contents.
-     * The staging area should be somewhere in .gitlet. If the current working version of the file is identical to the version in the current commit,
-     * do not stage it to be added, and remove it from the staging area if it is already there (as can happen when a file is changed, added, and then changed back to it’s original version).
-     * The file will no longer be staged for removal (see gitlet rm), if it was at the time of the command.
+     * Adds a copy of the file as it currently exists to the staging area
+     * (see the description of the commit command). For this reason,
+     * adding a file is also called staging the file for addition.
+     * Staging an already-staged file overwrites
+     * the previous entry in the staging area with the new contents.
+     * The staging area should be somewhere in .gitlet.
+     * If the current working version of the file is identical to the version in the
+     * current commit,
+     * do not stage it to be added, and remove it from the staging area if it is already
+     * there (as can happen when a file is changed, added, and then changed
+     * back to it’s original version).
+     * The file will no longer be staged for removal (see gitlet rm),
+     * if it was at the time of the command.
      * Find the file and check whether it exists
      * If exists, add the file to staging area
      * If the file is same as it in the HEAD commit, do not add it
@@ -121,7 +137,7 @@ public class Repository {
             return;
         } else if (stage.getAddedList().containsKey(filename)) {
             // if file exists in staging area, but content is different, delete origin file and create new one.
-            File deleteFile = join(StagingArea_DIR, stage.getAddedList().get(filename));
+            File deleteFile = join(STAGINGAREA_DIR, stage.getAddedList().get(filename));
             deleteFile.delete();
             stage.addFile(filename, addFileID);
         } else {
@@ -133,8 +149,10 @@ public class Repository {
     }
 
     /**
-     * Unstage the file if it is currently staged for addition. If the file is tracked in the current commit,
-     * stage it for removal and remove the file from the working directory if the user has not already done so
+     * Unstage the file if it is currently staged for addition.
+     * If the file is tracked in the current commit,
+     * stage it for removal and remove the file
+     * from the working directory if the user has not already done so
      * (do not remove it unless it is tracked in the current commit).
      *
      * @param filename the file you want to remove
@@ -154,7 +172,8 @@ public class Repository {
             StagingArea.removeStageFile(rmfileid);
             stage.getAddedList().remove(filename);
         } else if (HEADCommit.getBlobs().containsKey(filename)) {
-            // If the file is tracked in the current commit, stage it for removal and remove the file from the working directory
+            // If the file is tracked in the current commit,
+            // stage it for removal and remove the file from the working directory
             stage.getRemovedList().add(filename);
             rmfile.delete();
         }
@@ -163,13 +182,18 @@ public class Repository {
     }
 
     /**
-     * Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
-     * The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
+     * Saves a snapshot of tracked files in the current commit and staging area so
+     * they can be restored at a later time, creating a new commit.
+     * The commit is said to be tracking the saved files. By default,
+     * each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
      * it will keep versions of files exactly as they are, and not update them.
-     * A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit,
-     * in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
+     * A commit will only update the contents of files it is
+     * tracking that have been staged for addition at the time of commit,
+     * in which case the commit will now include the version
+     * of the file that was staged instead of the version it got from its parent.
      * A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent.
-     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command
+     * Finally, files tracked in the current commit may be
+     * untracked in the new commit as a result being staged for removal by the rm command
      * Copy the parent commit
      */
     public static void commit(String message) {
@@ -208,23 +232,26 @@ public class Repository {
         currentHEAD.writeHEADfile();
         // Set branch file
         String branchName = currentHEAD.getCurrentBranch();
-        File branchfile = join(Repository.heads_DIR, branchName);
+        File branchfile = join(Repository.HEADS_DIR, branchName);
         writeContents(branchfile, currentHEAD.getHEADfileID());
     }
 
     /**
      * Starting at the current head commit, display information about each commit backwards along
-     * the commit tree until the initial commit, following the first parent commit links, ignoring any second parents found in merge commits.
-     * (In regular Git, this is what you get with git log --first-parent). This set of commit nodes is called the commit’s history.
-     * For every node in this history, the information it should display is the commit id, the time the commit was made, and the commit message.
+     * the commit tree until the initial commit, following the first parent
+     * commit links, ignoring any second parents found in merge commits.
+     * (In regular Git, this is what you get with git log --first-parent).
+     * This set of commit nodes is called the commit’s history.
+     * For every node in this history, the information it should display is the commit id,
+     * the time the commit was made, and the commit message.
      */
     public static void log() {
         StringBuilder sb = new StringBuilder();
-        Commit HEADCommit = HEAD.getHEADCommit();
+        Commit headCommit = HEAD.getHEADCommit();
         Commit initialCommit = readObject(join(Repository.GITLET_DIR, "Initial"), Commit.class);
-        while (HEADCommit.getParent().size() > 0) {
-            sb.append(HEADCommit.getCommitasString());
-            HEADCommit = Commit.readCommitFile(HEADCommit.getParent().get(0));
+        while (headCommit.getParent().size() > 0) {
+            sb.append(headCommit.getCommitasString());
+            headCommit = Commit.readCommitFile(headCommit.getParent().get(0));
         }
         sb.append(initialCommit.getCommitasString());
         System.out.println(sb);
@@ -235,7 +262,7 @@ public class Repository {
      */
     public static void global_log() {
         StringBuilder sb = new StringBuilder();
-        List<String> commitNames = plainFilenamesIn(Commit_DIR);
+        List<String> commitNames = plainFilenamesIn(COMMIT_DIR);
         for (String commitName : commitNames) {
             Commit tempcommit = Commit.readCommitFile(commitName);
             sb.append(tempcommit.getCommitasString());
@@ -249,7 +276,7 @@ public class Repository {
      */
     public static void find(String message) {
         StringBuilder sb = new StringBuilder();
-        List<String> commitNames = plainFilenamesIn(Commit_DIR);
+        List<String> commitNames = plainFilenamesIn(COMMIT_DIR);
         for (String commitName : commitNames) {
             Commit tempcommit = Commit.readCommitFile(commitName);
             if (tempcommit.getMessage().equals(message)) {
@@ -281,17 +308,18 @@ public class Repository {
     }
 
     /**
-     * Takes the version of the file as it exists in the commit with the given id, and puts it in the working directory,
+     * Takes the version of the file as it exists in the commit
+     * with the given id, and puts it in the working directory,
      * overwriting the version of the file that’s already there if there is one.
      * The new version of the file is not staged.
      */
     public static void checkoutCommit(String commitID, String filename) {
-        Commit commit = Commit.readCommitFile(commitID);
-        List<String> commits = plainFilenamesIn(Commit_DIR);
+        List<String> commits = plainFilenamesIn(COMMIT_DIR);
         if (!commits.contains(commitID)){
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
+        Commit commit = Commit.readCommitFile(commitID);
         if (!(commit.getBlobs().containsKey(filename))) {
             System.out.println("File does not exist in that commit.");
             System.exit(0);
@@ -303,16 +331,19 @@ public class Repository {
     }
 
     /**
-     * Takes all files in the commit at the head of the given branch, and puts them in the working directory,
-     * overwriting the versions of the files that are already there if they exist. Also, at the end of this command,
+     * Takes all files in the commit at the head of the given branch,
+     * and puts them in the working directory,
+     * overwriting the versions of the files that are
+     * already there if they exist. Also, at the end of this command,
      * the given branch will now be considered the current branch (HEAD).
-     * Any files that are tracked in the current branch but are not present in the checked-out branch are deleted.
+     * Any files that are tracked in the current branch but are not
+     * present in the checked-out branch are deleted.
      * The staging area is cleared, unless the checked-out branch is the current branch
      */
     public static void checkoutBranch(String branchName) {
         //Failure case
         // no such branch
-        List<String> branchNames = plainFilenamesIn(heads_DIR);
+        List<String> branchNames = plainFilenamesIn(HEADS_DIR);
         if (!branchNames.contains(branchName)) {
             System.out.println("No such branch exists.");
             System.exit(0);
@@ -355,7 +386,8 @@ public class Repository {
     }
 
     /**
-     * Displays what branches currently exist, and marks the current branch with a *. Also displays what files have been staged for addition or removal.
+     * Displays what branches currently exist, and marks the current branch with a *.
+     * Also displays what files have been staged for addition or removal.
      */
     public static void status() {
         if (!GITLET_DIR.exists()) {
@@ -366,7 +398,7 @@ public class Repository {
         // Branches part, first add head branch, then other branches
         sb.append("=== Branches ===\n");
         HEAD head = HEAD.readHEADfile();
-        List<String> branchNames = plainFilenamesIn(heads_DIR);
+        List<String> branchNames = plainFilenamesIn(HEADS_DIR);
         for (String branchname : branchNames) {
             if (branchname.equals(head.getCurrentBranch())) {
                 sb.append("*" + branchname + "\n");
@@ -414,14 +446,14 @@ public class Repository {
      * Before you ever call branch, your code should be running with a default branch called master.
      */
     public static void branch(String branchName) {
-        List<String> branchNames = plainFilenamesIn(heads_DIR);
+        List<String> branchNames = plainFilenamesIn(HEADS_DIR);
         if (branchNames != null && branchNames.contains(branchName)) {
             System.out.println("A branch with that name already exists.");
             System.exit(0);
         }
-        Commit HEADCommit = HEAD.getHEADCommit();
-        String HEADCommitID = HEADCommit.getId();
-        File newbranch = join(heads_DIR, branchName);
+        Commit headCommit = HEAD.getHEADCommit();
+        String HEADCommitID = headCommit.getId();
+        File newbranch = join(HEADS_DIR, branchName);
         writeContents(newbranch, HEADCommitID);
     }
 
@@ -442,12 +474,14 @@ public class Repository {
     }
 
     /**
-     * Deletes the branch with the given name. This only means to delete the pointer associated with the branch;
-     * it does not mean to delete all commits that were created under the branch, or anything like that.
+     * Deletes the branch with the given name.
+     * This only means to delete the pointer associated with the branch;
+     * it does not mean to delete all commits that
+     * were created under the branch, or anything like that.
      */
     public static void rm_branch(String branchName) {
         HEAD head = HEAD.readHEADfile();
-        List<String> branchNames = plainFilenamesIn(heads_DIR);
+        List<String> branchNames = plainFilenamesIn(HEADS_DIR);
         if (!branchNames.contains(branchName)) {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
@@ -456,23 +490,27 @@ public class Repository {
             System.out.println("Cannot remove the current branch.");
             System.exit(0);
         }
-        File deleteBranch = join(heads_DIR, branchName);
+        File deleteBranch = join(HEADS_DIR, branchName);
         deleteBranch.delete();
     }
 
     /**
-     * Checks out all the files tracked by the given commit. Removes tracked files that are not present in that commit.
-     * Also moves the current branch’s head to that commit node. See the intro for an example of what happens to the head pointer after using reset.
-     * The [commit id] may be abbreviated as for checkout. The staging area is cleared.
-     * The command is essentially checkout of an arbitrary commit that also changes the current branch head.
+     * Checks out all the files tracked by the given commit.
+     * Removes tracked files that are not present in that commit.
+     * Also moves the current branch’s head to that commit node.
+     * See the intro for an example of what happens to the head pointer after using reset.
+     * The [commit id] may be abbreviated as for checkout.
+     * The staging area is cleared.
+     * The command is essentially checkout of an arbitrary
+     * commit that also changes the current branch head.
      */
     public static void reset(String commitID) {
-        List<String> commits = plainFilenamesIn(Commit_DIR);
+        List<String> commits = plainFilenamesIn(COMMIT_DIR);
         if (!commits.contains(commitID)) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
-        Commit HEADCommit = HEAD.getHEADCommit();
+        Commit headCommit = HEAD.getHEADCommit();
         Commit resetCommit = Commit.readCommitFile(commitID);
         LinkedList<String> untrackedfiles = getUntrackFile();
         for (String filename : resetCommit.getBlobs().keySet()) {
@@ -488,7 +526,7 @@ public class Repository {
             String blobID = resetCommit.getBlobs().get(filename);
             Blob.writeBlobAsFile(blobID);
         }
-        for (String filename : HEADCommit.getBlobs().keySet()) {
+        for (String filename : headCommit.getBlobs().keySet()) {
             if (!resetCommit.getBlobs().containsKey(filename)) {
                 File deleteFile = join(CWD, filename);
                 deleteFile.delete();
@@ -503,13 +541,18 @@ public class Repository {
         head.setHEADfileID(resetCommit.getId());
         head.writeHEADfile();
         //Move Branch
-        File branch = join(heads_DIR, head.getCurrentBranch());
+        File branch = join(HEADS_DIR, head.getCurrentBranch());
         writeContents(branch, resetCommit.getId());
     }
 
+    /** deal with the abbCommit less than 40 length
+     *
+     * @param abbID abbID, less than 40.
+     * @return full ID of the commit.
+     */
     public static String abbCommit(String abbID) {
         String returnstr = "111";
-        List<String> commits = plainFilenamesIn(Commit_DIR);
+        List<String> commits = plainFilenamesIn(COMMIT_DIR);
         for (String commit : commits) {
             String str = commit.substring(0, abbID.length());
             if (abbID.equals(str)) {
@@ -520,6 +563,83 @@ public class Repository {
         return returnstr;
     }
     public static void merge(String branchName){
+        // Failure case
+        StagingArea stage = StagingArea.readStagingAreaFile();
+        if (!stage.isEmpty()){
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+        List<String> branchs = plainFilenamesIn(HEADS_DIR);
+        if (!branchs.contains(branchName)){
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        HEAD head = HEAD.readHEADfile();
+        if (branchName.equals(head.getCurrentBranch())){
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        // No change after merge
+        Commit headCommit = HEAD.getHEADCommit();
+        Commit branchCommit = Commit.getBranchCommit(branchName);
+        if (headCommit.getBlobs().equals(branchCommit.getBlobs())){
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+        LinkedList<String> untrackedFiles = getUntrackFile();
+        for (String file : untrackedFiles){
+            if (branchCommit.getBlobs().keySet().contains(file)){
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+                break;
+            }
+        }
+        // Do the merge
 
+    }
+
+    /** Get common ancestor commit's ID of two commits
+     *
+     * @param mainCommitID Commit ID on main branch
+     * @param branchCommitID Commit ID on other branch
+     * @return Common Ancestor commit ID
+     */
+    private static String getCommonAncestor(String mainCommitID, String branchCommitID){
+        LinkedList<String> mainCommitParents = getAllParents(mainCommitID);
+        LinkedList<String> branchCommitParents = getAllParents(branchCommitID);
+        String returnString = "111";
+        if (mainCommitParents.size() >= branchCommitParents.size()){
+            for (String commitID : branchCommitParents){
+                if (mainCommitParents.contains(commitID)){
+                    returnString = commitID;
+                    break;
+                }
+            }
+        }else {
+            for(String commitID : mainCommitParents){
+                if (branchCommitParents.contains(commitID)){
+                    returnString = commitID;
+                    break;
+                }
+            }
+        }
+        return returnString;
+    }
+
+    /** Get all parents(including itself) of a commit
+     *
+     * @param commitID ID of the commit.
+     * @return A list contains all parents.
+     */
+    private static LinkedList<String> getAllParents(String commitID){
+        LinkedList<String> parents = new LinkedList<>();
+        Commit commit = Commit.readCommitFile(commitID);
+        while (commit.getParent().size() > 0){
+            parents.addLast(commit.getId());
+            commit = Commit.readCommitFile(commit.getParent().get(0));
+        }
+        Commit initialCommit = readObject(join(Repository.GITLET_DIR, "Initial"), Commit.class);
+        parents.addLast(initialCommit.getId());
+        return parents;
     }
 }
