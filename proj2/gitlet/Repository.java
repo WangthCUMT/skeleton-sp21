@@ -1,10 +1,7 @@
 package gitlet;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -594,8 +591,63 @@ public class Repository {
                 break;
             }
         }
-        // Do the merge
+        Commit commonAncestor = Commit.readCommitFile(getCommonAncestor(headCommit.getId(),branchCommit.getId()));
+        if (branchCommit.getId().equals(commonAncestor.getId())){
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+        if (headCommit.getId().equals(commonAncestor.getId())){
+            checkoutBranch(branchName);
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        }
+        // Do the merge, get all filenames
+        Set<String> headFiles = headCommit.getBlobs().keySet();
+        Set<String> branchFiles = branchCommit.getBlobs().keySet();
+        Set<String> ancestorFiles = commonAncestor.getBlobs().keySet();
+        HashMap<String,String> headBlobs = headCommit.getBlobs();
+        HashMap<String,String> branchBlobs = branchCommit.getBlobs();
+        HashMap<String,String> commonAncestorBlobs = commonAncestor.getBlobs();
+        HashSet<String> fileSet = getAllFiles(headCommit,branchCommit,commonAncestor);
+        for (String filename : fileSet){
+            if (allContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(headBlobs.get(filename))) && (!commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))){
+                stage.addFile(filename,branchBlobs.get(filename));
+            } else if (allContain(headFiles,branchFiles,ancestorFiles,filename)&& (!commonAncestorBlobs.get(filename).equals(headBlobs.get(filename)))&& (commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
 
+            } else if (ancestorFiles.contains(filename) &&(!headFiles.contains(filename)) && (!branchFiles.contains(filename))) {
+
+            } else if (branchNotContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(headBlobs.get(filename)))) {
+                stage.removeFile(filename);
+            } else if (headNotContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
+
+            } else if (onlyBranchContain(headFiles,branchFiles,ancestorFiles,filename)) {
+                stage.addFile(filename,branchBlobs.get(filename));
+            } else if (onlyHeadContain(headFiles,branchFiles,ancestorFiles,filename)) {
+                
+            }
+        }
+    }
+    private static HashSet<String> getAllFiles(Commit commit1, Commit commit2, Commit commit3){
+        HashSet<String> fileSet = new HashSet<>();
+        fileSet.addAll(commit1.getBlobs().keySet());
+        fileSet.addAll(commit2.getBlobs().keySet());
+        fileSet.addAll(commit3.getBlobs().keySet());
+        return fileSet;
+    }
+    private static boolean allContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+        return branchFiles.contains(filename) && headFiles.contains(filename) && ancestorFiles.contains(filename);
+    }
+    private static boolean branchNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+        return ancestorFiles.contains(filename) && headFiles.contains(filename) && (!branchFiles.contains(filename));
+    }
+    private static boolean headNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+        return ancestorFiles.contains(filename) && (!headFiles.contains(filename)) && branchFiles.contains(filename);
+    }
+    private static boolean onlyBranchContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+        return (!ancestorFiles.contains(filename)) && (!headFiles.contains(filename)) && branchFiles.contains(filename);
+    }
+    private static boolean onlyHeadContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+        return (!ancestorFiles.contains(filename)) && headFiles.contains(filename) && (!branchFiles.contains(filename));
     }
 
     /** Get common ancestor commit's ID of two commits
