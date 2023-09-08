@@ -206,7 +206,7 @@ public class Repository {
         }
         // Copy the HEAD commit and add HEADcommit's id in newCommit's parent list
         Commit newCommit = new Commit(message);
-        stageFileToCommit(newCommit,stage);
+        stageFileToCommit(newCommit, stage);
         // Change newcommit's id
         newCommit.setId(sha1(message, newCommit.getTimestamp().toString(), newCommit.getParent().toString(), newCommit.getBlobs().toString()));
         stage.clearStage();
@@ -222,7 +222,8 @@ public class Repository {
         File branchfile = join(Repository.HEADS_DIR, branchName);
         writeContents(branchfile, currentHEAD.getHEADfileID());
     }
-    private static void stageFileToCommit(Commit newCommit, StagingArea stage){
+
+    private static void stageFileToCommit(Commit newCommit, StagingArea stage) {
         // Add all the files in staging area to commit's blobs
         for (Map.Entry<String, String> item : stage.getAddedList().entrySet()) {
             String filename = item.getKey();
@@ -315,7 +316,7 @@ public class Repository {
      */
     public static void checkoutCommit(String commitID, String filename) {
         List<String> commits = plainFilenamesIn(COMMIT_DIR);
-        if (!commits.contains(commitID)){
+        if (!commits.contains(commitID)) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
         }
@@ -545,7 +546,8 @@ public class Repository {
         writeContents(branch, resetCommit.getId());
     }
 
-    /** deal with the abbCommit less than 40 length
+    /**
+     * deal with the abbCommit less than 40 length
      *
      * @param abbID abbID, less than 40.
      * @return full ID of the commit.
@@ -562,44 +564,45 @@ public class Repository {
         }
         return returnstr;
     }
-    public static void merge(String branchName){
+
+    public static void merge(String branchName) {
         // Failure case
         StagingArea stage = StagingArea.readStagingAreaFile();
-        if (!stage.isEmpty()){
+        if (!stage.isEmpty()) {
             System.out.println("You have uncommitted changes.");
             System.exit(0);
         }
         List<String> branchs = plainFilenamesIn(HEADS_DIR);
-        if (!branchs.contains(branchName)){
+        if (!branchs.contains(branchName)) {
             System.out.println("A branch with that name does not exist.");
             System.exit(0);
         }
         HEAD head = HEAD.readHEADfile();
-        if (branchName.equals(head.getCurrentBranch())){
+        if (branchName.equals(head.getCurrentBranch())) {
             System.out.println("Cannot merge a branch with itself.");
             System.exit(0);
         }
         // No change after merge
         Commit headCommit = HEAD.getHEADCommit();
         Commit branchCommit = Commit.getBranchCommit(branchName);
-        if (headCommit.getBlobs().equals(branchCommit.getBlobs())){
+        if (headCommit.getBlobs().equals(branchCommit.getBlobs())) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
         LinkedList<String> untrackedFiles = getUntrackFile();
-        for (String file : untrackedFiles){
-            if (branchCommit.getBlobs().keySet().contains(file)){
+        for (String file : untrackedFiles) {
+            if (branchCommit.getBlobs().containsKey(file)) {
                 System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
                 break;
             }
         }
-        Commit commonAncestor = Commit.readCommitFile(getCommonAncestor(headCommit.getId(),branchCommit.getId()));
-        if (branchCommit.getId().equals(commonAncestor.getId())){
+        Commit commonAncestor = Commit.readCommitFile(getCommonAncestor(headCommit.getId(), branchCommit.getId()));
+        if (branchCommit.getId().equals(commonAncestor.getId())) {
             System.out.println("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
-        if (headCommit.getId().equals(commonAncestor.getId())){
+        if (headCommit.getId().equals(commonAncestor.getId())) {
             checkoutBranch(branchName);
             System.out.println("Current branch fast-forwarded.");
             System.exit(0);
@@ -608,28 +611,28 @@ public class Repository {
         Set<String> headFiles = headCommit.getBlobs().keySet();
         Set<String> branchFiles = branchCommit.getBlobs().keySet();
         Set<String> ancestorFiles = commonAncestor.getBlobs().keySet();
-        HashMap<String,String> headBlobs = headCommit.getBlobs();
-        HashMap<String,String> branchBlobs = branchCommit.getBlobs();
-        HashMap<String,String> commonAncestorBlobs = commonAncestor.getBlobs();
-        HashSet<String> fileSet = getAllFiles(headCommit,branchCommit,commonAncestor);
-        for (String filename : fileSet){
-            if (allContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(headBlobs.get(filename))) && (!commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))){
-                stage.addFile(filename,branchBlobs.get(filename));
-            } else if (allContain(headFiles,branchFiles,ancestorFiles,filename)&& (!commonAncestorBlobs.get(filename).equals(headBlobs.get(filename)))&& (commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
+        HashMap<String, String> headBlobs = headCommit.getBlobs();
+        HashMap<String, String> branchBlobs = branchCommit.getBlobs();
+        HashMap<String, String> commonAncestorBlobs = commonAncestor.getBlobs();
+        HashSet<String> fileSet = getAllFiles(headCommit, branchCommit, commonAncestor);
+        for (String filename : fileSet) {
+            if (allContain(headFiles, branchFiles, ancestorFiles, filename) && (commonAncestorBlobs.get(filename).equals(headBlobs.get(filename))) && (!commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
+                stage.addFile(filename, branchBlobs.get(filename));
+            } else if (allContain(headFiles, branchFiles, ancestorFiles, filename) && (!commonAncestorBlobs.get(filename).equals(headBlobs.get(filename))) && (commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
 
-            } else if (ancestorFiles.contains(filename) &&(!headFiles.contains(filename)) && (!branchFiles.contains(filename))) {
+            } else if (ancestorFiles.contains(filename) && (!headFiles.contains(filename)) && (!branchFiles.contains(filename))) {
 
-            } else if (branchNotContain(headFiles,branchFiles,ancestorFiles,filename)) {
+            } else if (branchNotContain(headFiles, branchFiles, ancestorFiles, filename)) {
                 stage.removeFile(filename);
-            } else if (headNotContain(headFiles,branchFiles,ancestorFiles,filename)) {
+            } else if (headNotContain(headFiles, branchFiles, ancestorFiles, filename)) {
 
-            } else if (onlyBranchContain(headFiles,branchFiles,ancestorFiles,filename)) {
-                stage.addFile(filename,branchBlobs.get(filename));
-            } else if (onlyHeadContain(headFiles,branchFiles,ancestorFiles,filename)) {
-                
+            } else if (onlyBranchContain(headFiles, branchFiles, ancestorFiles, filename)) {
+                stage.addFile(filename, branchBlobs.get(filename));
+            } else if (onlyHeadContain(headFiles, branchFiles, ancestorFiles, filename)) {
+
             } else {
                 StringBuilder sb = new StringBuilder();
-                if (branchFiles.contains(filename)){
+                if (branchFiles.contains(filename)) {
                     String headBlobID = headBlobs.get(filename);
                     String branchBlobID = branchBlobs.get(filename);
                     Blob headBlob = Blob.readBlobFile(headBlobID);
@@ -639,26 +642,26 @@ public class Repository {
                     sb.append("=======" + "\n");
                     sb.append(branchBlob.getContentAsString() + "\n");
                     sb.append(">>>>>>>");
-                }else {
+                } else {
                     String headBlobID = headBlobs.get(filename);
                     Blob headBlob = Blob.readBlobFile(headBlobID);
                     sb.append("<<<<<<< HEAD" + "\n");
                     sb.append(headBlob.getContentAsString() + "=======");
                     sb.append(">>>>>>>");
                 }
-                File conflictFile = join(GITLET_DIR,filename);
-                writeContents(conflictFile,sb);
-                Blob conflict = new Blob(filename,conflictFile);
+                File conflictFile = join(GITLET_DIR, filename);
+                writeContents(conflictFile, sb);
+                Blob conflict = new Blob(filename, conflictFile);
                 conflict.writeBlobFileStage();
-                stage.addFile(filename,conflict.getId());
+                stage.addFile(filename, conflict.getId());
             }
         }
         LinkedList<String> parents = new LinkedList<>();
         parents.add(headCommit.getId());
         parents.add(branchCommit.getId());
-        String mergeMessage = "Merged " + branchName +  " into " + head.getCurrentBranch() + ".";
+        String mergeMessage = "Merged " + branchName + " into " + head.getCurrentBranch() + ".";
         Commit mergedCommit = new Commit(mergeMessage, parents);
-        stageFileToCommit(mergedCommit,stage);
+        stageFileToCommit(mergedCommit, stage);
         mergedCommit.setId(sha1(mergeMessage, mergedCommit.getTimestamp().toString(), mergedCommit.getParent().toString(), mergedCommit.getBlobs().toString()));
         stage.clearStage();
         stage.writeStagingAreaFile();
@@ -672,49 +675,56 @@ public class Repository {
         File branchfile = join(Repository.HEADS_DIR, branch);
         writeContents(branchfile, head.getHEADfileID());
     }
-    private static HashSet<String> getAllFiles(Commit commit1, Commit commit2, Commit commit3){
+
+    private static HashSet<String> getAllFiles(Commit commit1, Commit commit2, Commit commit3) {
         HashSet<String> fileSet = new HashSet<>();
         fileSet.addAll(commit1.getBlobs().keySet());
         fileSet.addAll(commit2.getBlobs().keySet());
         fileSet.addAll(commit3.getBlobs().keySet());
         return fileSet;
     }
-    private static boolean allContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+
+    private static boolean allContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles, String filename) {
         return branchFiles.contains(filename) && headFiles.contains(filename) && ancestorFiles.contains(filename);
     }
-    private static boolean branchNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+
+    private static boolean branchNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles, String filename) {
         return ancestorFiles.contains(filename) && headFiles.contains(filename) && (!branchFiles.contains(filename));
     }
-    private static boolean headNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+
+    private static boolean headNotContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles, String filename) {
         return ancestorFiles.contains(filename) && (!headFiles.contains(filename)) && branchFiles.contains(filename);
     }
-    private static boolean onlyBranchContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+
+    private static boolean onlyBranchContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles, String filename) {
         return (!ancestorFiles.contains(filename)) && (!headFiles.contains(filename)) && branchFiles.contains(filename);
     }
-    private static boolean onlyHeadContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles,String filename){
+
+    private static boolean onlyHeadContain(Set<String> headFiles, Set<String> branchFiles, Set<String> ancestorFiles, String filename) {
         return (!ancestorFiles.contains(filename)) && headFiles.contains(filename) && (!branchFiles.contains(filename));
     }
 
-    /** Get common ancestor commit's ID of two commits
+    /**
+     * Get common ancestor commit's ID of two commits
      *
-     * @param mainCommitID Commit ID on main branch
+     * @param mainCommitID   Commit ID on main branch
      * @param branchCommitID Commit ID on other branch
      * @return Common Ancestor commit ID
      */
-    private static String getCommonAncestor(String mainCommitID, String branchCommitID){
+    private static String getCommonAncestor(String mainCommitID, String branchCommitID) {
         LinkedList<String> mainCommitParents = getAllParents(mainCommitID);
         LinkedList<String> branchCommitParents = getAllParents(branchCommitID);
         String returnString = "111";
-        if (mainCommitParents.size() >= branchCommitParents.size()){
-            for (String commitID : branchCommitParents){
-                if (mainCommitParents.contains(commitID)){
+        if (mainCommitParents.size() >= branchCommitParents.size()) {
+            for (String commitID : branchCommitParents) {
+                if (mainCommitParents.contains(commitID)) {
                     returnString = commitID;
                     break;
                 }
             }
-        }else {
-            for(String commitID : mainCommitParents){
-                if (branchCommitParents.contains(commitID)){
+        } else {
+            for (String commitID : mainCommitParents) {
+                if (branchCommitParents.contains(commitID)) {
                     returnString = commitID;
                     break;
                 }
@@ -723,15 +733,16 @@ public class Repository {
         return returnString;
     }
 
-    /** Get all parents(including itself) of a commit
+    /**
+     * Get all parents(including itself) of a commit
      *
      * @param commitID ID of the commit.
      * @return A list contains all parents.
      */
-    private static LinkedList<String> getAllParents(String commitID){
+    private static LinkedList<String> getAllParents(String commitID) {
         LinkedList<String> parents = new LinkedList<>();
         Commit commit = Commit.readCommitFile(commitID);
-        while (commit.getParent().size() > 0){
+        while (commit.getParent().size() > 0) {
             parents.addLast(commit.getId());
             commit = Commit.readCommitFile(commit.getParent().get(0));
         }

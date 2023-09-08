@@ -61,6 +61,10 @@ public class Main {
                     Repository.checkoutHEADCommit(args[2]);
                 } else {
                     // java gitlet.Main checkout [commit id] -- [file name]
+                    if (!args[2].equals("--")){
+                        System.out.println("Incorrect operands.");
+                        System.exit(0);
+                    }
                     if (args[1].length() < 40) {
                         String commitID = Repository.abbCommit(args[1]);
                         Repository.checkoutCommit(commitID, args[3]);
