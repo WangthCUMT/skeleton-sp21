@@ -631,6 +631,7 @@ public class Repository {
             } else if (onlyHeadContain(headFiles, branchFiles, ancestorFiles, filename)) {
 
             } else {
+                System.out.println("Encountered a merge conflict.");
                 StringBuilder sb = new StringBuilder();
                 if (branchFiles.contains(filename)) {
                     String headBlobID = headBlobs.get(filename);
