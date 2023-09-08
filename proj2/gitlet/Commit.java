@@ -54,6 +54,14 @@ public class Commit implements Serializable {
         this.Blobs = HEADCommit.getBlobs(); // Get parent's blobs
         this.id = HEADCommit.getId();
     }
+    public Commit(String message, LinkedList<String> parents){
+        this.message = message;
+        this.timestamp = new Date();
+        this.parent = parents;
+        Commit HEADCommit = HEAD.getHEADCommit();
+        this.Blobs = HEADCommit.getBlobs();
+        this.id = HEADCommit.getId();
+    }
 
     public List<String> getParent() {
         return parent;
@@ -120,17 +128,15 @@ public class Commit implements Serializable {
     }
 
     public String getCommitasString() {
-        String sb = "===\n" +
-                "commit " +
-                this.getId()
-                + "\n"
-                +
-                "Date: "
-                + this.getDateString()
-                + "\n"
-                + this.message
-                + "\n\n";
-        return sb;
+        StringBuffer sb = new StringBuffer();
+        sb.append("===\n");
+        sb.append("commit " + this.id + "\n");
+        if (parent.size() == 2) {
+            sb.append("Merge: " + parent.get(0).substring(0, 7) + " " + parent.get(1).substring(0, 7) + "\n");
+        }
+        sb.append("Date: " + this.getDateString() + "\n");
+        sb.append(this.message + "\n\n");
+        return sb.toString();
     }
 
     /**

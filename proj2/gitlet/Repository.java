@@ -206,17 +206,7 @@ public class Repository {
         }
         // Copy the HEAD commit and add HEADcommit's id in newCommit's parent list
         Commit newCommit = new Commit(message);
-        // Add all the files in staging area to commit's blobs
-        for (Map.Entry<String, String> item : stage.getAddedList().entrySet()) {
-            String filename = item.getKey();
-            String fileID = item.getValue();
-            newCommit.getBlobs().put(filename, fileID);
-            stage.moveStagefileToBlob(fileID);
-        }
-        // Remove all the file in staging area remove
-        for (String filename : stage.getRemovedList()) {
-            newCommit.getBlobs().remove(filename);
-        }
+        stageFileToCommit(newCommit,stage);
         // Change newcommit's id
         newCommit.setId(sha1(message, newCommit.getTimestamp().toString(), newCommit.getParent().toString(), newCommit.getBlobs().toString()));
         stage.clearStage();
@@ -231,6 +221,19 @@ public class Repository {
         String branchName = currentHEAD.getCurrentBranch();
         File branchfile = join(Repository.HEADS_DIR, branchName);
         writeContents(branchfile, currentHEAD.getHEADfileID());
+    }
+    private static void stageFileToCommit(Commit newCommit, StagingArea stage){
+        // Add all the files in staging area to commit's blobs
+        for (Map.Entry<String, String> item : stage.getAddedList().entrySet()) {
+            String filename = item.getKey();
+            String fileID = item.getValue();
+            newCommit.getBlobs().put(filename, fileID);
+            stage.moveStagefileToBlob(fileID);
+        }
+        // Remove all the file in staging area remove
+        for (String filename : stage.getRemovedList()) {
+            newCommit.getBlobs().remove(filename);
+        }
     }
 
     /**
@@ -616,16 +619,58 @@ public class Repository {
 
             } else if (ancestorFiles.contains(filename) &&(!headFiles.contains(filename)) && (!branchFiles.contains(filename))) {
 
-            } else if (branchNotContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(headBlobs.get(filename)))) {
+            } else if (branchNotContain(headFiles,branchFiles,ancestorFiles,filename)) {
                 stage.removeFile(filename);
-            } else if (headNotContain(headFiles,branchFiles,ancestorFiles,filename) && (commonAncestorBlobs.get(filename).equals(branchBlobs.get(filename)))) {
+            } else if (headNotContain(headFiles,branchFiles,ancestorFiles,filename)) {
 
             } else if (onlyBranchContain(headFiles,branchFiles,ancestorFiles,filename)) {
                 stage.addFile(filename,branchBlobs.get(filename));
             } else if (onlyHeadContain(headFiles,branchFiles,ancestorFiles,filename)) {
                 
+            } else {
+                StringBuilder sb = new StringBuilder();
+                if (branchFiles.contains(filename)){
+                    String headBlobID = headBlobs.get(filename);
+                    String branchBlobID = branchBlobs.get(filename);
+                    Blob headBlob = Blob.readBlobFile(headBlobID);
+                    Blob branchBlob = Blob.readBlobFile(branchBlobID);
+                    sb.append("<<<<<<< HEAD" + "\n");
+                    sb.append(headBlob.getContentAsString() + "\n");
+                    sb.append("=======" + "\n");
+                    sb.append(branchBlob.getContentAsString() + "\n");
+                    sb.append(">>>>>>>");
+                }else {
+                    String headBlobID = headBlobs.get(filename);
+                    Blob headBlob = Blob.readBlobFile(headBlobID);
+                    sb.append("<<<<<<< HEAD" + "\n");
+                    sb.append(headBlob.getContentAsString() + "=======");
+                    sb.append(">>>>>>>");
+                }
+                File conflictFile = join(GITLET_DIR,filename);
+                writeContents(conflictFile,sb);
+                Blob conflict = new Blob(filename,conflictFile);
+                conflict.writeBlobFileStage();
+                stage.addFile(filename,conflict.getId());
             }
         }
+        LinkedList<String> parents = new LinkedList<>();
+        parents.add(headCommit.getId());
+        parents.add(branchCommit.getId());
+        String mergeMessage = "Merged " + branchName +  " into " + head.getCurrentBranch() + ".";
+        Commit mergedCommit = new Commit(mergeMessage, parents);
+        stageFileToCommit(mergedCommit,stage);
+        mergedCommit.setId(sha1(mergeMessage, mergedCommit.getTimestamp().toString(), mergedCommit.getParent().toString(), mergedCommit.getBlobs().toString()));
+        stage.clearStage();
+        stage.writeStagingAreaFile();
+        // Save new commit
+        mergedCommit.writeCommitFile();
+        // Set HEAD to this commit and the branch
+        head.setHEADCommit(mergedCommit.getId());
+        head.writeHEADfile();
+        // Set branch file
+        String branch = head.getCurrentBranch();
+        File branchfile = join(Repository.HEADS_DIR, branch);
+        writeContents(branchfile, head.getHEADfileID());
     }
     private static HashSet<String> getAllFiles(Commit commit1, Commit commit2, Commit commit3){
         HashSet<String> fileSet = new HashSet<>();
